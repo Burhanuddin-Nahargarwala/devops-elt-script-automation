@@ -31,18 +31,16 @@ jobs:
       - name: Run Unit Tests with Pytest
         run: pytest tests/
 
-      # Step 5: Deploy the ETL Script to Databricks Workspace
-      # The pipeline's responsibility ends here.
-      - name: Deploy Python script to Databricks
+      # Step 5: Deploy the entire directory ---
+      - name: Deploy src directory to Databricks
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          echo "Deploying etl_script.py to /Shared/ETL/ on Databricks..."
-          # Corrected Syntax: Added the mandatory --language option.
-          databricks workspace import \
-            --language PYTHON \
-            --overwrite \
-            ./src/etl_script.py \
-            /Shared/ETL/etl_script.py
+          echo "Deploying the entire src directory to /Shared/ETL/ on Databricks..."
+          # Use import_dir to upload the whole folder.
+          # The destination folder /Shared/ETL will be created if it doesn't exist.
+          databricks workspace import_dir \
+            src \
+            /Shared/ETL
           echo "Deployment successful."
