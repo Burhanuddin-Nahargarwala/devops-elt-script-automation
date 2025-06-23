@@ -39,9 +39,9 @@ jobs:
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           echo "Deploying etl_script.py to /Shared/ETL/ on Databricks..."
-          # Corrected Syntax: Remove --path and use positional arguments.
-          # Add --overwrite as an option before the paths.
+          # Corrected Syntax: Added the mandatory --language option.
           databricks workspace import \
+            --language PYTHON \
             --overwrite \
             ./src/etl_script.py \
             /Shared/ETL/etl_script.py
