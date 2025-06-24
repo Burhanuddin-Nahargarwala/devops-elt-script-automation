@@ -31,7 +31,7 @@ jobs:
       - name: Run Unit Tests with Pytest
         run: pytest tests/
 
-      # Step 5: Deploy Code to Databricks Repo
+            # Step 5: Deploy Code to Databricks Repo
       - name: Deploy Code to Databricks Repo
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
@@ -40,13 +40,13 @@ jobs:
 
           echo "Explicitly configuring Databricks CLI..."
           # Create the configuration directory if it doesn't exist
-          mkdir -p ~/.databrickscfg
+          mkdir -p ~/.databrickscfg/
           
-          # Manually write the configuration file using the secrets
-          # This bypasses the interactive prompt completely.
+          # Manually write the configuration to the 'config' FILE inside the DIRECTORY
+          # The change is adding '/config' to the end of the path.
           echo "[default]
           host = ${{ secrets.DATABRICKS_HOST }}
-          token = ${{ secrets.DATABRICKS_TOKEN }}" > ~/.databrickscfg
+          token = ${{ secrets.DATABRICKS_TOKEN }}" > ~/.databrickscfg/config
           
           echo "Configuration complete. Syncing GitHub repo to Databricks Repos..."
           
