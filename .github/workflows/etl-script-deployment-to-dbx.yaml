@@ -31,24 +31,28 @@ jobs:
       - name: Run Unit Tests with Pytest
         run: pytest tests/
 
-      # Step 5: Deploy to Databricks Repo
+      # Step 5: Deploy Code to Databricks Repo
       - name: Deploy Code to Databricks Repo
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
           echo "Installing Databricks CLI..."
           pip install databricks-cli
 
-          echo "Syncing GitHub repo to Databricks Repos..."
+          echo "Explicitly configuring Databricks CLI..."
+          # Create the configuration directory if it doesn't exist
+          mkdir -p ~/.databrickscfg
           
-          # Configure Databricks CLI with the token
-          databricks configure --token
+          # Manually write the configuration file using the secrets
+          # This bypasses the interactive prompt completely.
+          echo "[default]
+          host = ${{ secrets.DATABRICKS_HOST }}
+          token = ${{ secrets.DATABRICKS_TOKEN }}" > ~/.databrickscfg
+          
+          echo "Configuration complete. Syncing GitHub repo to Databricks Repos..."
           
           # Define Repo path and Git URL
           REPO_PATH="/Repos/Production/databricks-etl-pipeline"
-          GIT_URL="https://github.com/${{ github.repository }}" # Automatically gets your repo URL
+          GIT_URL="https://github.com/${{ github.repository }}"
 
           # Check if the repo already exists in Databricks
           if databricks repos get --path $REPO_PATH; then
