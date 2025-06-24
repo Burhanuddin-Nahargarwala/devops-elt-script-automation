@@ -31,10 +31,9 @@ jobs:
       - name: Run Unit Tests with Pytest
         run: pytest tests/
 
-      # Step 5: Deploy Code to Databricks Repo
+        # Step 5: Deploy Code to Databricks Repo
       - name: Deploy Code to Databricks Repo
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        # Set the environment variables for all commands in this step
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
@@ -42,13 +41,10 @@ jobs:
           echo "Installing Databricks CLI..."
           pip install databricks-cli
 
-          # --- Optional but recommended debugging ---
-          # This will confirm the environment variables are set correctly for this step.
-          # You can remove this section after it succeeds once.
-          echo "--- Verifying Environment Variables ---"
-          echo "Host is: $DATABRICKS_HOST"
-          echo "Token is present: $(if [ -n "$DATABRICKS_TOKEN" ]; then echo "true"; else echo "false"; fi)"
-          echo "--- End Verification ---"
+          echo "Ensuring parent directory exists in Databricks Workspace..."
+          # THIS IS THE NEW LINE THAT FIXES THE ERROR
+          # It creates the /Repos/Production directory if it doesn't already exist.
+          databricks workspace mkdirs /Repos/Production
           
           echo "Syncing GitHub repo to Databricks Repos..."
           
@@ -56,8 +52,7 @@ jobs:
           REPO_PATH="/Repos/Production/databricks-etl-pipeline"
           GIT_URL="https://github.com/${{ github.repository }}"
 
-          # The following commands will now automatically use the environment variables.
-          # Check if the repo already exists in Databricks.
+          # The following commands will now work because the parent path exists.
           if databricks repos get --path $REPO_PATH; then
             echo "Repo exists. Updating to latest commit..."
             databricks repos update --path $REPO_PATH --branch main
@@ -65,7 +60,5 @@ jobs:
             echo "Repo does not exist. Cloning it..."
             databricks repos create --path $REPO_PATH --url $GIT_URL --provider gitHub
           fi
-          
-          echo "Deployment to Databricks Repos successful!"
           
           echo "Deployment to Databricks Repos successful!"
